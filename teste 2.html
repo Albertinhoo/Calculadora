@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora de Taxas - Receber ou Passar</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background: #ffffff;
+      padding: 20px 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333333;
+      font-size: 1.8em;
+      margin-bottom: 20px;
+    }
+
+    label {
+      font-weight: bold;
+      color: #555555;
+    }
+
+    select, input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #cccccc;
+      border-radius: 5px;
+      font-size: 1em;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .result {
+      margin-top: 20px;
+      font-size: 1.2em;
+      text-align: center;
+    }
+
+    .result span {
+      font-weight: bold;
+    }
+
+    .result .value-pass {
+      color: red;
+    }
+
+    .result .value-final {
+      color: green;
+    }
+
+    .result.error {
+      color: #dc3545;
+    }
+
+    .copy-btn {
+      margin-top: 10px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 10px;
+      font-size: 1em;
+      cursor: pointer;
+      border-radius: 5px;
+      width: 100%;
+    }
+
+    .copy-btn:hover {
+      background-color: #218838;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Calculadora de Taxas</h1>
+    <form id="calculatorForm">
+      <label for="operation">Você quer:</label>
+      <select id="operation" required>
+        <option value="passar">Passar o valor</option>
+        <option value="receber">Receber o valor</option>
+      </select>
+
+      <label for="value">Digite o valor (R$):</label>
+      <input type="number" id="value" step="0.01" placeholder="0.00" required />
+
+      <label for="installments">Em quantas vezes?</label>
+      <select id="installments" required>
+        <option value="7.0">1x</option>
+        <option value="7.7">2x</option>
+        <option value="8.0">3x</option>
+        <option value="8.5">4x</option>
+        <option value="9.0">5x</option>
+        <option value="9.5">6x</option>
+        <option value="10.0">7x</option>
+        <option value="10.5">8x</option>
+        <option value="10.8">9x</option>
+        <option value="11.0">10x</option>
+        <option value="12.0">11x</option>
+        <option value="12.5">12x</option>
+      </select>
+
+      <button type="submit">Calcular</button>
+    </form>
+
+    <div class="result" id="result"></div>
+    <button class="copy-btn" id="copyBtn" style="display:none;">Copiar Resultado</button>
+  </div>
+
+  <script>
+    document.getElementById("calculatorForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const operation = document.getElementById("operation").value;
+      const value = parseFloat(document.getElementById("value").value);
+      const installments = parseFloat(document.getElementById("installments").value);
+      const numInstallments = document.getElementById("installments").selectedIndex + 1; // Número de parcelas começa em 1
+
+      if (isNaN(value) || isNaN(installments) || numInstallments < 1) {
+        const resultDiv = document.getElementById("result");
+        resultDiv.textContent = "Por favor, insira valores válidos e escolha um número de parcelas.";
+        resultDiv.className = "result error";
+        return;
+      }
+
+      let resultText = "";
+
+      if (operation === "passar") {
+        const finalValue = value - (value * installments / 100);
+        const installmentValue = value / numInstallments; // Divisão pelo valor passado diretamente
+        resultText = `Para passar o valor de <span class='value-pass'>R$ ${value.toFixed(2)}</span>, o cliente receberá <span class='value-final'>*R$ ${finalValue.toFixed(2)}*</span>. Cada parcela será de R$ ${installmentValue.toFixed(2)}.`;
+      } else if (operation === "receber") {
+        const initialValue = value / (1 - installments / 100);
+        const installmentValue = initialValue / numInstallments; // Valor de cada parcela considerando o valor total
+        resultText = `Para receber o valor de <span class='value-final'>*R$ ${value.toFixed(2)}*</span>, o valor final será <span class='value-pass'>R$ ${initialValue.toFixed(2)}</span>. Cada parcela será de R$ ${installmentValue.toFixed(2)}.`;
+      }
+
+      const resultDiv = document.getElementById("result");
+      resultDiv.innerHTML = resultText;
+      resultDiv.className = "result";
+
+      const copyBtn = document.getElementById("copyBtn");
+      copyBtn.style.display = "block";
+      copyBtn.onclick = function () {
+        navigator.clipboard.writeText(resultDiv.textContent).then(() => {
+          alert("Resultado copiado para a área de transferência!");
+        });
+      };
+    });
+  </script>
+</body>
+</html>
